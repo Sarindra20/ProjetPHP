@@ -12,12 +12,12 @@ if (isset($_GET['id'])) {
     $stmt = $connexion->prepare($sql);
     $stmt->execute([$id]);
 
-    header("Location: liste.php");
+    header("Location: listeOrg.php");
     echo "Delete exécuté";
     exit();
 } else {
 
-    header("Location: liste.php");
+    header("Location: listeOrg.php");
     echo "Delete exécuté";
     exit();
 }

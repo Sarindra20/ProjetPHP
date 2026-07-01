@@ -1,27 +1,24 @@
 <?php
 require_once("../conn.php");
 
-if (isset($_POST['Id_Organisme']) &&
+if (
+    isset($_POST['Id_Organisme']) &&
     isset($_POST['Design']) &&
-    isset($_POST['Lieu']))
-{
+    isset($_POST['Lieu'])
+) {
 
-    $ido= $_POST['Id_Organisme'];
-    $des      = $_POST['Design'];
-    $lieu  = $_POST['Lieu'];
-
-    // Requête SQL
-    $sql = "INSERT INTO organisme(Id_Organisme,Design, Lieu)
+    $sql = "INSERT INTO organisme(Id_Organisme, Design, Lieu)
             VALUES (?, ?, ?)";
 
     $stmt = $connexion->prepare($sql);
+
     $stmt->execute([
-       $ido,
-        $des,
-        $lieu
+        $_POST['Id_Organisme'],
+        $_POST['Design'],
+        $_POST['Lieu']
     ]);
 
-    header("Location: liste.php");
+    header("Location: listeOrg.php");
     exit();
 
 } else {

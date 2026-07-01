@@ -1,268 +1,224 @@
 <?php
 include('../include/header.php');
-// include('../include/sidebar.php');
+include('../include/sidebar.php');
 
-//connexion à la base de donné
 require_once("../conn.php");
 
+//code pour la modification direct des informations des étudiants sur la ligne
 $editStudent = null;
 if (isset($_GET['id'])) {
 
     $id = $_GET['id'];
 
-    $sql = "SELECT * FROM etudiant WHERE Matriculle = ?";
+    $sql = "SELECT * FROM etudiant WHERE Matriculle = ?"; //récupère l'id de l'étudiant concerné
     $stmt = $connexion->prepare($sql);
     $stmt->execute([$id]);
 
     $editStudent = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-//requête pour la sélection des étudiants dans la BD
-$sql = "SELECT * FROM etudiant";
+// liste étudiants
+$sql = "SELECT * FROM etudiant"; //requête SQL ppour sélectionner tout les attributs de la table Etudiant de la BD
 $stmt = $connexion->prepare($sql);
 $stmt->execute();
 
-//récuppération des donnnée
-$student =
-    $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    
-   require_once("../conn.php");
-
-$search = isset($_GET['search']) ? trim($_GET['search']) : "";
-
-// Requête unique
-$sql = "SELECT * FROM etudiant WHERE 1=1";
-
-// si recherche
-if (!empty($search)) {
-    $sql .= " AND (
-        Matriculle LIKE :search
-        OR Nom LIKE :search
-        OR Prénoms LIKE :search
-    )";
-}
-
-$stmt = $connexion->prepare($sql);
-
-// bind seulement si recherche
-if (!empty($search)) {
-    $stmt->bindValue(':search', "%$search%");
-}
-
-$stmt->execute();
-
-$etudiants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$student = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
-<?php foreach ($etudiants as $e): ?>
-<tr>
-    <td><?= $e['Matriculle'] ?></td>
-    <td><?= $e['Nom'] ?></td>
-    <td><?= $e['Prénoms'] ?></td>
-</tr>
-<?php endforeach; ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liste des étudiants</title>
-    <!-- <link href="../assets/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
 
-    <style class="css">
+    <!-- CSS -->
+    <style>
         table,
         td,
         tr,
         th {
-            border: 1px solid #000000;
+            border: 1px solid #000;
+            border-collapse: collapse;
             margin-top: 70px;
             margin-left: 150px;
         }
 
+        /* 
         h1 {
             margin-top: 50px;
             margin-left: 150px;
-
-
-        }
+        } */
 
         th {
-            background-attachment: fixed;
-            background-color: #f0a90f;
+            background-color: #034c3c;
+            color: white;
+            height: 35px;
+            text-align: center;
+        }
+
+        td {
+            text-align: center;
             height: 30px;
-            width: 120px;
-            text-align: center;
-            color: #ffff;
-            font-style: sans-serif;
+            width: 100px;
         }
 
-        td,
-        tr {
-            text-align: left;
-            background-color: #ffffff;
-            height: 30px;
-            width: 120px;
-            text-align: center;
-
-
+        a {
+            margin: 5px;
+            text-decoration: none;
         }
 
-        #Mat {
-            text-align: center;
-
-        }
-
-        #Name {
-            /* text-transform: Capitalize(); */
-            text-align: left;
-
-        }
-
-        #Lastname {
-            width: 160px;
-            text-align: left;
-        }
+        /* .add{
+            float: right;
+        } */
     </style>
 </head>
 
 <body>
 
-    <form method="GET" action="">
-        <input type="text" name="search" placeholder="Rechercher un étudiant...">
-        <button type="submit">Rechercher</button>
-    </form>
-    <h1 class="titre">Liste de étudiants</h1>
+    <h4>Liste des étudiants</h4ss>
 
-    <table class="liste">
-        <tr>
-            <th>Matricule</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Niveau</th>
-            <th>Parcours</th>
-            <th colspan="2">Action</th>
+        <table>
+            <tr>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Niveau</th> <!--tableau qui afficgera la liste des étudiant de la bd-->
+                <th>Parcours</th>
+                <th>Email</th>
+                <th>Action</th>
+            </tr>
 
-        </tr>
-    
+            <!-- bouble PHP qui va récupérer la liste des étudiants de la base de donnée puis de les afficher dans notre tableua -->
+            <?php foreach ($student as $student): ?>
+
+                <!-- APPEL DE LA FONTION EDITsTUDENT SI L4USER APPUIE SUR LE BOUTON edit -->
+                <?php if ($editStudent && $student['Matriculle'] == $editStudent['Matriculle']) : ?>
+
+                    <!-- FORMULAIRE QUI APPELERA LA FONTION DANS LE FIC edit.php POUR LA MODIFICATION -->
+                    <form action="edit.php" method="POST">
+                        <tr>
 
 
-        <?php foreach ($student as $student): ?>
+                            <td>
+                                <!-- Ancien matricule -->
+                                <input type="hidden" name="old_matricule" value="<?= $student['Matriculle'] ?>">
 
-            <?php if ($editStudent && $student['Matriculle'] == $editStudent['Matriculle']) : ?>
+                                <!-- Nouveau matricule modifiable -->
+                                <input type="text" name="Matriculle" value="<?= $student['Matriculle'] ?>">
+                            </td>
 
-                <form action="edit.php" method="POST">
+                            <td><input type="text" name="Nom" value="<?= $student['Nom'] ?>"></td>
+
+                            <td><input type="text" name="Prénoms" value="<?= $student['Prénoms'] ?>"></td>
+
+                            <td>
+                                <select name="Niveau">
+                                    <option value="L1" <?= $student['Niveau'] == "L1" ? "selected" : "" ?>>L1</option>
+                                    <option value="L2" <?= $student['Niveau'] == "L2" ? "selected" : "" ?>>L2</option>
+                                    <option value="L3" <?= $student['Niveau'] == "L3" ? "selected" : "" ?>>L3</option>
+                                    <option value="M1" <?= $student['Niveau'] == "M1" ? "selected" : "" ?>>M1</option>
+                                    <option value="M2" <?= $student['Niveau'] == "M2" ? "selected" : "" ?>>M2</option>
+                                </select>
+                            </td>
+
+                            <td>
+                                <select name="Parcours">
+                                    <option value="IG" <?= $student['Parcours'] == "IG" ? "selected" : "" ?>>IG</option>
+                                    <option value="GB" <?= $student['Parcours'] == "GB" ? "selected" : "" ?>>GB</option>
+                                    <option value="SR" <?= $student['Parcours'] == "SR" ? "selected" : "" ?>>SR</option>
+                                </select>
+                            </td>
+
+
+                            <td>
+                                <input type="email" name="adr_email" value="<?= $student['adr_email'] ?>">
+                            </td>
+
+
+                            <td>
+                                <button type="submit">Valider</button>
+
+                                <a href="delete.php?id=<?= urlencode($student['Matriculle']) ?>"
+                                    onclick="return confirm('Supprimer cet étudiant ?')">
+                                    Delete
+                                </a>
+                            </td>
+
+                        </tr>
+                    </form>
+
+                    <!-- SINON, le tableau affiche seulement les listes -->
+                <?php else: ?>
 
                     <tr>
+                        <td><?= $student['Matriculle'] ?></td>
+                        <td><?= $student['Nom'] ?></td>
+                        <td><?= $student['Prénoms'] ?></td>
+                        <td><?= $student['Niveau'] ?></td>
+                        <td><?= $student['Parcours'] ?></td>
+
+
+                        <td><?= $student['adr_email'] ?></td>
+
 
                         <td>
-                            <input type="hidden" name="Matriculle" value="<?= $student['Matriculle'] ?>">
-                            <?= $student['Matriculle'] ?>
-                        </td>
+                            <a href="liste.php?id=<?= $student['Matriculle'] ?>">Edit</a>
 
-                        <td>
-                            <input type="text" name="Nom" value="<?= $student['Nom'] ?>">
+                            <a href="delete.php?id=<?= urlencode($student['Matriculle']) ?>"
+                                onclick="return confirm('Voulez-vous vraiment supprimer ?')">
+                                Delete
+                            </a>
                         </td>
-
-                        <td>
-                            <input type="text" name="Prénoms" value="<?= $student['Prénoms'] ?>">
-                        </td>
-
-                        <td>
-                            <select name="Niveau">
-                                <option value="L1" <?= $student['Niveau'] == "L1" ? "selected" : "" ?>>L1</option>
-                                <option value="L2" <?= $student['Niveau'] == "L2" ? "selected" : "" ?>>L2</option>
-                                <option value="L3" <?= $student['Niveau'] == "L3" ? "selected" : "" ?>>L3</option>
-                                <option value="M1" <?= $student['Niveau'] == "M1" ? "selected" : "" ?>>M1</option>
-                                <option value="M2" <?= $student['Niveau'] == "M2" ? "selected" : "" ?>>M2</option>
-                            </select>
-                        </td>
-
-                        <td>
-                            <select name="Parcours">
-                                <option value="IG" <?= $student['Parcours'] == "IG" ? "selected" : "" ?>>IG</option>
-                                <option value="GB" <?= $student['Parcours'] == "GB" ? "selected" : "" ?>>GB</option>
-                                <option value="SR" <?= $student['Parcours'] == "SR" ? "selected" : "" ?>>SR</option>
-                            </select>
-                        </td>
-
-                        <td>
-                            <button type="submit">Valider</button>
-                        </td>
-
-                        <td>
-                            <a href="delete.php?id=<?= urlencode($student['Matriculle']) ?>" onclick="confirm('voulez vous suprimer cette étudiant???')">Delete</a>
-                        </td>
-
                     </tr>
 
-                </form>
+                <?php endif; ?>
 
-            <?php else: ?>
+            <?php endforeach; ?>
 
-                <tr>
+        </table>
 
-                    <td><?= $student['Matriculle'] ?></td>
-                    <td><?= $student['Nom'] ?></td>
-                    <td><?= $student['Prénoms'] ?></td>
-                    <td><?= $student['Niveau'] ?></td>
-                    <td><?= $student['Parcours'] ?></td>
+        <!-- formulaire pour l,'ajout de l'étudiant -->
+        <h2>Ajouter un étudiant</h2>
 
-                    <td>
-                        <a href="delete.php?id=<?= urlencode($student['Matriculle']) ?>" onclick="return confirm('Voulez-vous vraiment supprimer cet étudiant ?')">Delete</a>
-                    </td>
+        <form action="insert.php" method="POST" class="add">
 
-                    <td>
-                        <a href="liste.php?id=<?= $student['Matriculle'] ?>">Edit</a>
-                    </td>
+            <input type="text" name="Matriculle" placeholder="Matricule" required><br><br>
 
-                </tr>
+            <input type="text" name="Nom" placeholder="Nom" required><br><br>
 
-            <?php endif; ?>
+            <input type="text" name="Prénoms" placeholder="Prénoms" required><br><br>
 
-        <?php endforeach; ?>
-    </table>
+            <label>Niveau :</label>
+            <select name="Niveau" required>
+                <option value="">--Choisir--</option>
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+                <option value="L3">L3</option>
+                <option value="M1">M1</option>
+                <option value="M2">M2</option>
+            </select>
 
-    <h2>Ajouter un étudiant</h2>
+            <br><br>
 
-    <form action="insert.php" method="POST">
+            <label>Parcours :</label>
+            <select name="Parcours" required>
+                <option value="">--Choisir--</option>
+                <option value="IG">IG</option>
+                <option value="GB">GB</option>
+                <option value="SR">SR</option>
+            </select>
 
-        <input type="text" name="Matriculle" placeholder="Matricule" required>
-        <br><br>
+            <br><br>
 
-        <input type="text" name="Nom" placeholder="Nom" required>
-        <br><br>
+            <!-- EMAIL -->
+            <input type="email" name="adr_email" placeholder="Email" required>
 
-        <input type="text" name="Prénoms" placeholder="Prénoms" required>
-        <br><br>
+            <br><br>
 
-        <label>Niveau :</label>
-        <select name="Niveau" required>
-            <option value="">--Choisir--</option>
-            <option value="L1">L1</option>
-            <option value="L2">L2</option>
-            <option value="L3">L3</option>
-            <option value="M1">M1</option>
-            <option value="M2">M2</option>
-        </select>
+            <button type="submit">Ajouter</button>
 
-        <br><br>
-
-        <label>Parcours :</label>
-        <select name="Parcours" required>
-            <option value="">--Choisir--</option>
-            <option value="IG">IG</option>
-            <option value="GB">GB</option>
-            <option value="SR">SR</option>
-        </select>
-
-        <br><br>
-
-        <button type="submit">Ajouter</button>
-
-    </form>
+        </form>
 
 </body>
 

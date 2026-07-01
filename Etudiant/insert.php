@@ -1,22 +1,25 @@
 <?php
 require_once("../conn.php");
 
-if (isset($_POST['Matriculle']) &&
+if (
+    isset($_POST['Matriculle']) &&
     isset($_POST['Nom']) &&
     isset($_POST['Prénoms']) &&
     isset($_POST['Niveau']) &&
-    isset($_POST['Parcours']))
-{
+    isset($_POST['Parcours'])
+) {
 
     $matricule = $_POST['Matriculle'];
     $nom       = $_POST['Nom'];
     $prenom    = $_POST['Prénoms'];
     $niveau    = $_POST['Niveau'];
+
     $parcours  = $_POST['Parcours'];
+     $email = $_POST['adr_email'];
 
     // Requête SQL
-    $sql = "INSERT INTO etudiant(Matriculle, Nom, Prénoms, Niveau, Parcours)
-            VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO etudiant(Matriculle, Nom, Prénoms, Niveau,Parcours,adr_email)
+            VALUES (?, ?, ?, ?,?, ?)";
 
     $stmt = $connexion->prepare($sql);
     $stmt->execute([
@@ -24,14 +27,13 @@ if (isset($_POST['Matriculle']) &&
         $nom,
         $prenom,
         $niveau,
-        $parcours
+        $parcours,
+        $email
     ]);
 
     header("Location: liste.php");
     exit();
-
 } else {
 
     echo "Tous les champs sont obligatoires.";
 }
-?>
