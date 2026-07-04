@@ -40,54 +40,85 @@ else  {
 
     <style>
 
-        *{
-            padding: 0;
-            margin: 0;
-            font-family: 'Times New Roman', Times, serif;
-        }
-    body{
-                    background-color: #ffffff;
-
-    }
-        .boiteConn{
-    /* border: 1px solid black; */
-    border-radius: 20px;
-    /* padding-left: 400px; */
-    margin-left: 550px;
-    margin-top: 200px;
-    height: 400px;
-    width: 400px;
-    box-shadow: 5px 10px 10px black;
-    background-color: #fffdfd;
-    text-align: center; 
-    display: flex;
-    flex-direction: column;
-    /* gap: 15px; */
+* {
+    margin: 0;
     padding: 0;
-
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
 }
 
-input{
-    height: 35px;
-    width: 250px;
-    border-radius: 30px;
-    /* margin-top: 100px; */
-    /* margin-bottom: 15px; */
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f4f6f9;
 }
 
-input,button{
-        margin-top: 40px;
 
+.boiteConn {
+    width: 380px;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 5px 20px rgba(0,0,0,0.15);
+    text-align: center;
 }
-button{
-    height: 35px;
-    width: 200px;
-    border-radius: 30px;
+
+
+.boiteConn h1 {
+    margin-bottom: 25px;
+    color: #04371d;
+    font-size: 24px;
+    text-transform: uppercase;
+}
+
+
+.boiteConn input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+
+.boiteConn input:focus {
+    border-color: #04371d;
+    box-shadow: 0 0 5px rgba(4,55,29,0.3);
+}
+
+
+.boiteConn button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 25px;
+    border: none;
+    border-radius: 8px;
+    background: #04371d;
+    color: white;
+    font-size: 15px;
     cursor: pointer;
-    margin-top: 50x;
-    box-shadow: 5px 10px 10px black;
-
+    transition: 0.3s;
 }
+
+
+.boiteConn button:hover {
+    background: #066b35;
+}
+
+
+.error {
+    color: red;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+
 
 
     </style>

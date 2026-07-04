@@ -13,9 +13,8 @@ if (
     $nom       = $_POST['Nom'];
     $prenom    = $_POST['Prénoms'];
     $niveau    = $_POST['Niveau'];
-
     $parcours  = $_POST['Parcours'];
-     $email = $_POST['adr_email'];
+    $email = $_POST['adr_email'];
 
     // Requête SQL
     $sql = "INSERT INTO etudiant(Matriculle, Nom, Prénoms, Niveau,Parcours,adr_email)
@@ -35,5 +34,5 @@ if (
     exit();
 } else {
 
-    echo "Tous les champs sont obligatoires.";
+    echo "veuillez remplir les champs.";
 }

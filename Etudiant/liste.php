@@ -2,8 +2,29 @@
 include('../include/header.php');
 include('../include/sidebar.php');
 
-require_once("../conn.php");
+require_once("../conn.php"); #mm commande que include
+if (isset($_GET['recherche']) && !empty(trim($_GET['recherche']))) {
 
+    $mot = "%" . trim($_GET['recherche']) . "%";
+
+    $sql = "SELECT *
+            FROM etudiant
+            WHERE Matriculle LIKE ?
+            OR Nom LIKE ?
+            OR `Prénoms` LIKE ?
+            ORDER BY Nom";
+
+    $stmt = $connexion->prepare($sql);
+    $stmt->execute([$mot, $mot, $mot]);
+} else {
+
+    $sql = "SELECT * FROM etudiant ORDER BY Nom";
+
+    $stmt = $connexion->prepare($sql);
+    $stmt->execute();
+}
+
+$etudiants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 //code pour la modification direct des informations des étudiants sur la ligne
 $editStudent = null;
 if (isset($_GET['id'])) {
@@ -18,11 +39,28 @@ if (isset($_GET['id'])) {
 }
 
 // liste étudiants
-$sql = "SELECT * FROM etudiant"; //requête SQL ppour sélectionner tout les attributs de la table Etudiant de la BD
-$stmt = $connexion->prepare($sql);
-$stmt->execute();
+if (isset($_GET['recherche']) && !empty(trim($_GET['recherche']))) {
 
-$student = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $mot = "%" . trim($_GET['recherche']) . "%";
+
+    $sql = "SELECT *
+            FROM etudiant
+            WHERE Matriculle LIKE ?
+            OR Nom LIKE ?
+            OR `Prénoms` LIKE ?
+            ORDER BY Nom";
+
+    $stmt = $connexion->prepare($sql);
+    $stmt->execute([$mot, $mot, $mot]);
+} else {
+
+    $sql = "SELECT * FROM etudiant ORDER BY Nom";
+
+    $stmt = $connexion->prepare($sql);
+    $stmt->execute();
+}
+
+$etudiants = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -31,195 +69,200 @@ $student = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <title>Liste des étudiants</title>
-
-    <!-- CSS -->
-    <style>
-        table,
-        td,
-        tr,
-        th {
-            border: 1px solid #000;
-            border-collapse: collapse;
-            margin-top: 70px;
-            margin-left: 150px;
-        }
-
-        /* 
-        h1 {
-            margin-top: 50px;
-            margin-left: 150px;
-        } */
-
-        th {
-            background-color: #034c3c;
-            color: white;
-            height: 35px;
-            text-align: center;
-        }
-
-        td {
-            text-align: center;
-            height: 30px;
-            width: 100px;
-        }
-
-        a {
-            margin: 5px;
-            text-decoration: none;
-        }
-
-        /* .add{
-            float: right;
-        } */
-    </style>
+    <link rel="stylesheet" href="listStyle.css">
 </head>
 
 <body>
 
-    <h4>Liste des étudiants</h4ss>
+    <div class="main">
+        <form method="GET" style="margin:20px; display:flex; gap:10px;" class="search">
 
-        <table>
-            <tr>
-                <th>Matricule</th>
-                <th>Nom</th>
-                <th>Prénom</th>
-                <th>Niveau</th> <!--tableau qui afficgera la liste des étudiant de la bd-->
-                <th>Parcours</th>
-                <th>Email</th>
-                <th>Action</th>
-            </tr>
+            <input type="text"
+                name="recherche"
+                placeholder="Rechercher par matricule, nom ou prénom"
+                value="<?= isset($_GET['recherche']) ? htmlspecialchars($_GET['recherche']) : '' ?>"
+                style="padding:8px; width:250px;">
 
-            <!-- bouble PHP qui va récupérer la liste des étudiants de la base de donnée puis de les afficher dans notre tableua -->
-            <?php foreach ($student as $student): ?>
+            <button type="submit" style="padding:8px 15px;" class="search">Search
+            </button>
 
-                <!-- APPEL DE LA FONTION EDITsTUDENT SI L4USER APPUIE SUR LE BOUTON edit -->
-                <?php if ($editStudent && $student['Matriculle'] == $editStudent['Matriculle']) : ?>
+            <!-- bouton reset -->
+            <a href="liste.php"  class="refresh" style="background-color:#3498db; color: white; width: 80px; height: 35px;font-size: 13px; text-align:center"> Refresh
+            </a>
 
-                    <!-- FORMULAIRE QUI APPELERA LA FONTION DANS LE FIC edit.php POUR LA MODIFICATION -->
-                    <form action="edit.php" method="POST">
+        </form>
+        <h4>Liste des étudiants</h4>
+
+            <table>
+                <tr>
+                    <th>Matricule</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Niveau</th> <!--tableau qui afficgera la liste des étudiant de la bd-->
+                    <th>Parcours</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+
+                <!-- bouble PHP qui va récupérer la liste des étudiants de la base de donnée puis de les afficher dans notre tableua -->
+                <?php foreach ($etudiants as $student): ?>
+
+                    <!-- APPEL DE LA FONTION EDITsTUDENT SI L4USER APPUIE SUR LE BOUTON edit -->
+                    <?php if ($editStudent && $student['Matriculle'] == $editStudent['Matriculle']) : ?>
+
+                        <!-- FORMULAIRE QUI APPELERA LA FONTION DANS LE FIC edit.php POUR LA MODIFICATION -->
+                        <form action="edit.php" method="POST" class="edition">
+                            <tr>
+
+
+                                <td>
+                                    <!-- Ancien matricule -->
+                                    <input type="hidden" name="old_matricule" value="<?= $student['Matriculle'] ?>">
+
+                                    <!-- Nouveau matricule modifiable -->
+                                    <input class="mll" type="text" name="Matriculle" value="<?= $student['Matriculle'] ?>">
+                                </td>
+
+                                <td><input class="name" type="text" name="Nom" style="text-transorm: uppercase;" value="<?= $student['Nom'] ?>"></td>
+
+                                <td><input class="lastname"type="text" name="Prénoms" style="text-transform: capitalize;" value="<?= $student['Prénoms'] ?>"></td>
+
+                                <td>
+                                    <select class="niv" name="Niveau">
+                                        <option value="L1" <?= $student['Niveau'] == "L1" ? "selected" : "" ?>>L1</option>
+                                        <option value="L2" <?= $student['Niveau'] == "L2" ? "selected" : "" ?>>L2</option>
+                                        <option value="L3" <?= $student['Niveau'] == "L3" ? "selected" : "" ?>>L3</option>
+                                        <option value="M1" <?= $student['Niveau'] == "M1" ? "selected" : "" ?>>M1</option>
+                                        <option value="M2" <?= $student['Niveau'] == "M2" ? "selected" : "" ?>>M2</option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <select class=" par"name="Parcours">
+                                        <option value="IG" <?= $student['Parcours'] == "IG" ? "selected" : "" ?>>IG</option>
+                                        <option value="GB" <?= $student['Parcours'] == "GB" ? "selected" : "" ?>>GB</option>
+                                        <option value="SR" <?= $student['Parcours'] == "SR" ? "selected" : "" ?>>SR</option>
+                                    </select>
+                                </td>
+
+
+                                <td>
+                                    <input  class="mail"type="email" name="adr_email" value="<?= $student['adr_email'] ?>">
+                                </td>
+
+
+                                <td>
+                                    <button type="submit" class="valider">Valider</button>
+
+                                    <a href="delete.php?id=<?= urlencode($student['Matriculle']) ?>"
+                                        onclick="return confirm('Supprimer cet étudiant ?')">
+                                        Delete
+                                    </a>
+                                </td>
+
+                            </tr>
+                        </form>
+
+                        <!-- SINON, le tableau affiche seulement les listes -->
+                    <?php else: ?>
+
                         <tr>
+                            <td><?= $student['Matriculle'] ?></td>
+                            <td><?= $student['Nom'] ?></td>
+                            <td><?= $student['Prénoms'] ?></td>
+                            <td><?= $student['Niveau'] ?></td>
+                            <td><?= $student['Parcours'] ?></td>
+
+
+                            <td><?= $student['adr_email'] ?></td>
 
 
                             <td>
-                                <!-- Ancien matricule -->
-                                <input type="hidden" name="old_matricule" value="<?= $student['Matriculle'] ?>">
-
-                                <!-- Nouveau matricule modifiable -->
-                                <input type="text" name="Matriculle" value="<?= $student['Matriculle'] ?>">
-                            </td>
-
-                            <td><input type="text" name="Nom" value="<?= $student['Nom'] ?>"></td>
-
-                            <td><input type="text" name="Prénoms" value="<?= $student['Prénoms'] ?>"></td>
-
-                            <td>
-                                <select name="Niveau">
-                                    <option value="L1" <?= $student['Niveau'] == "L1" ? "selected" : "" ?>>L1</option>
-                                    <option value="L2" <?= $student['Niveau'] == "L2" ? "selected" : "" ?>>L2</option>
-                                    <option value="L3" <?= $student['Niveau'] == "L3" ? "selected" : "" ?>>L3</option>
-                                    <option value="M1" <?= $student['Niveau'] == "M1" ? "selected" : "" ?>>M1</option>
-                                    <option value="M2" <?= $student['Niveau'] == "M2" ? "selected" : "" ?>>M2</option>
-                                </select>
-                            </td>
-
-                            <td>
-                                <select name="Parcours">
-                                    <option value="IG" <?= $student['Parcours'] == "IG" ? "selected" : "" ?>>IG</option>
-                                    <option value="GB" <?= $student['Parcours'] == "GB" ? "selected" : "" ?>>GB</option>
-                                    <option value="SR" <?= $student['Parcours'] == "SR" ? "selected" : "" ?>>SR</option>
-                                </select>
-                            </td>
-
-
-                            <td>
-                                <input type="email" name="adr_email" value="<?= $student['adr_email'] ?>">
-                            </td>
-
-
-                            <td>
-                                <button type="submit">Valider</button>
+                                <a href="liste.php?id=<?= $student['Matriculle'] ?>">Edit</a>
 
                                 <a href="delete.php?id=<?= urlencode($student['Matriculle']) ?>"
-                                    onclick="return confirm('Supprimer cet étudiant ?')">
+                                    onclick="return confirm('Voulez-vous vraiment supprimer ?')">
                                     Delete
                                 </a>
                             </td>
-
                         </tr>
-                    </form>
 
-                    <!-- SINON, le tableau affiche seulement les listes -->
-                <?php else: ?>
+                    <?php endif; ?>
 
-                    <tr>
-                        <td><?= $student['Matriculle'] ?></td>
-                        <td><?= $student['Nom'] ?></td>
-                        <td><?= $student['Prénoms'] ?></td>
-                        <td><?= $student['Niveau'] ?></td>
-                        <td><?= $student['Parcours'] ?></td>
+                <?php endforeach; ?>
 
+            </table>
 
-                        <td><?= $student['adr_email'] ?></td>
+            <!-- formulaire pour l,'ajout de l'étudiant -->
+           <div class="form-container">
 
+    <h2>Ajouter un étudiant</h2>
 
-                        <td>
-                            <a href="liste.php?id=<?= $student['Matriculle'] ?>">Edit</a>
+    <form action="insert.php" method="POST" class="add">
 
-                            <a href="delete.php?id=<?= urlencode($student['Matriculle']) ?>"
-                                onclick="return confirm('Voulez-vous vraiment supprimer ?')">
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
+        <div class="row">
 
-                <?php endif; ?>
+            <div class="col">
+                <input type="text" name="Matriculle" placeholder="Matricule" required>
+            </div>
 
-            <?php endforeach; ?>
+            <div class="col">
+                <input type="text" name="Nom" placeholder="Nom" style="text-transform: uppercase;" required>
+            </div>
 
-        </table>
+        </div>
 
-        <!-- formulaire pour l,'ajout de l'étudiant -->
-        <h2>Ajouter un étudiant</h2>
+        <div class="row">
 
-        <form action="insert.php" method="POST" class="add">
+            <div class="col">
+                <input type="text" name="Prénoms" placeholder="Prénoms" style="text-transform: capitalize;" required>
+            </div>
 
-            <input type="text" name="Matriculle" placeholder="Matricule" required><br><br>
+            <div class="col">
 
-            <input type="text" name="Nom" placeholder="Nom" required><br><br>
+                <select name="Niveau" required>
+                    <option value="">Niveau</option>
+                    <option value="L1">L1</option>
+                    <option value="L2">L2</option>
+                    <option value="L3">L3</option>
+                    <option value="M1">M1</option>
+                    <option value="M2">M2</option>
+                </select>
+            </div>
 
-            <input type="text" name="Prénoms" placeholder="Prénoms" required><br><br>
+        </div>
 
-            <label>Niveau :</label>
-            <select name="Niveau" required>
-                <option value="">--Choisir--</option>
-                <option value="L1">L1</option>
-                <option value="L2">L2</option>
-                <option value="L3">L3</option>
-                <option value="M1">M1</option>
-                <option value="M2">M2</option>
-            </select>
+        <div class="row">
 
-            <br><br>
+            <div class="col">
+                
 
-            <label>Parcours :</label>
-            <select name="Parcours" required>
-                <option value="">--Choisir--</option>
-                <option value="IG">IG</option>
-                <option value="GB">GB</option>
-                <option value="SR">SR</option>
-            </select>
+                <select name="Parcours" required>
+                    <option value="" placeholder="Parcours">Parcours</option>
+                    <option value="IG">IG</option>
+                    <option value="GB">GB</option>
+                    <option value="SR">SR</option>
+                </select>
+            </div>
 
-            <br><br>
+            <div class="col">
+                <input type="email" name="adr_email" placeholder="Email" required>
+            </div>
 
-            <!-- EMAIL -->
-            <input type="email" name="adr_email" placeholder="Email" required>
+        </div>
 
-            <br><br>
+        <button type="submit">
+            Ajouter
+        </button>
 
-            <button type="submit">Ajouter</button>
+    </form>
 
-        </form>
+</div>
 
 </body>
+<?php
+include('../include/footer.php');
+
+?>
 
 </html>

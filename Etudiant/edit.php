@@ -12,22 +12,20 @@ if (
 ) {
 
     $sql = "UPDATE etudiant
-            SET Nom = ?, Prénoms = ?, Niveau = ?, Parcours = ?, adr_email = ?
-            WHERE Matriculle = ?";
+        SET Nom = ?, Prénoms = ?, Niveau = ?, Parcours = ?, adr_email = ?
+        WHERE Matriculle = ?";
 
-    $stmt = $connexion->prepare($sql);
+$stmt = $connexion->prepare($sql);
 
-    $stmt->execute([
-         $_POST['Matriculle'],
-        $_POST['Nom'],
-        $_POST['Prénoms'],
-        $_POST['Niveau'],
-        $_POST['Parcours'],
-        $_POST['adr_email'],
-        $_POST['old_matricule']
-
-
-    ]);
+$stmt->execute([
+    
+    $_POST['Nom'],
+    $_POST['Prénoms'],
+    $_POST['Niveau'],
+    $_POST['Parcours'],
+    $_POST['adr_email'],
+    $_POST['old_matricule']
+]);
 
     header("Location: liste.php");
     exit();
